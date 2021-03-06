@@ -2,19 +2,39 @@ import axios from "axios";
 import React, { useState, useEffect } from 'react';
 import useStyles from './Fstyles';
 import { TextField, Button, Typography, Paper } from '@material-ui/core';
-import { useDispatch, useSelector } from 'react-redux';
-import {createPostAction} from "../actions/PostAction";
+import { useDispatch,useSelector} from 'react-redux';
+import {createPostAction,updatePostAction} from "../actions/PostAction";
 
 const Form = () => {
   const classes = useStyles()
+  const dispatch = useDispatch()
+  const getpost = useSelector(state=> state.singlepost)
+  
   const [postData, setPostData] = useState({
     creator:"", title:"", message:"", tags:"", selectedFile:""
   })
-  const dispatch = useDispatch()
-
+  
+  useEffect(() => {
+    if(getpost.post!=null){
+      setPostData(getpost.post)
+    }else{
+      setPostData({
+        creator:"", title:"", message:"", tags:"", selectedFile:""
+      })
+    }
+  }, [getpost])
+  
   const handleSubmit = (e)=>{
     e.preventDefault()
-    dispatch(createPostAction(postData))
+    if(getpost.post == null){
+      dispatch(createPostAction(postData))
+    }else{
+      dispatch(updatePostAction(getpost.post._id,postData))
+    }
+    setPostData({
+      creator:"", title:"", message:"", tags:"", selectedFile:""
+    })
+
   }
 
   const FileHandler = async(e) =>{
@@ -30,7 +50,6 @@ const Form = () => {
       }
       const {data} = await axios.post("/api/post/upload",formData,config) 
       setPostData({...postData, selectedFile:data})
-      console.log(data)
     } catch (error) {
       console.log(error)
     }

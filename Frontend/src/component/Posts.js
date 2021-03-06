@@ -10,11 +10,11 @@ const Posts = () => {
     const dispatch = useDispatch()
     const postsSelector = useSelector(state=> state.getposts)
     const {posts} = postsSelector
-
+    
     useEffect(() => {
       dispatch(allPosts())
-    }, [dispatch])
-    
+    }, [allPosts])
+
     return (
       !posts.length ? <CircularProgress /> : (
         <Grid className={classes.container} container alignItems="stretch" spacing={3}>

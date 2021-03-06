@@ -10,13 +10,12 @@ const app = express()
 dotenv.config()
 connectDB()
 const PORT = process.env.PORT || 8000
-if(process.env.NODE_ENV === "development"){
-    app.use(morgan("dev"))
-}
+app.use(morgan("dev"))
 
 app.use(express.json())
 app.use("/api/user",userRouter)
 app.use("/api/post",postRouter)
 
-app.use("/uploads",express.static(path.join(__dirname,"/uploads")))
+app.use("/uploads",express.static(path.join(__dirname,"../uploads")))
+
 app.listen(PORT, ()=>console.log(`SERVER CONNNECTED ON ${PORT}`))
