@@ -13,7 +13,7 @@ const Posts = () => {
     
     useEffect(() => {
       dispatch(allPosts())
-    }, [allPosts])
+    }, [dispatch])
 
     return (
       !posts.length ? <CircularProgress /> : (
