@@ -3,6 +3,7 @@ const path = require("path")
 const route = express.Router()
 const Post = require("../models/postModel")
 const multer = require("multer")
+const auth = require("../middleware/Auth")
 
 //fetch all posts
 route.get("/", async(req,res)=>{
@@ -10,12 +11,13 @@ route.get("/", async(req,res)=>{
         const getpost = await Post.find()
         res.status(200).json(getpost)
     } catch (error) {
-        res.status(404).json({msg:"no post"})
+        console.error(error.message);
+        res.status(500).send("Server Error");
     }
 })
 
 //fetch single post
-route.get("/single/:id", async(req,res)=>{
+route.get("/single/:id",auth, async(req,res)=>{
     try {
         const getpost = await Post.findById(req.params.id)
         if(!getpost){
@@ -55,18 +57,27 @@ route.post("/upload",upload.single("image"),(req,res)=>{
     res.send(`/${file}`)
 })
 
-route.post("/", async(req,res)=>{
+route.post("/",auth, async(req,res)=>{
     const post = req.body
+    //console.log(req.file)
     try {
-        const createpost = new Post(post)
+        const createpost = new Post({
+            tags:post.tags,
+            creator:post.creator,
+            title: post.title,
+            message: post.message,
+            selectedFile: post.selectedFile,
+            user:req.userId
+        })
         await createpost.save()    
-        res.status(200).json(createpost)
+        res.json(createpost)
     } catch (error) {
-        res.status(404).json({msg:"create post failed"})
+        console.error(error.message);
+        res.status(500).send("Server Error");
     }
 })
 
-//new
+/*
 route.patch("/:id",async(req,res)=>{
     const post = req.body
     const {id:_id} = req.params.id
@@ -80,10 +91,10 @@ route.patch("/:id",async(req,res)=>{
     } catch (error) {
         res.status(404).json({msg:"post update fail"})
     }
-})
+})*/
 
 
-/*route.put("/:id",async(req,res)=>{
+route.put("/:id",auth,async(req,res)=>{
     const post = req.body
     const _id = req.params.id
     try {
@@ -101,9 +112,51 @@ route.patch("/:id",async(req,res)=>{
         }
           
     } catch (error) {
-        res.status(404).json({msg:"post update fail"})
+        console.error(error.message);
+        res.status(500).send("Server Error");
     }
-})*/
+})
+
+route.delete("/single/:id/delete",auth, async(req, res)=>{
+    try{
+    const deletepost = await Post.findById(req.params.id)
+    if(!deletepost){
+        return res.status(404).send("invalid post id")
+    }
+    await Post.remove(deletepost)
+    res.json("Post Deleted")
+    }catch(error){
+        console.error(error.message);
+        res.status(500).send("Server Error");
+    }
+})
+
+route.put("/single/:id/like",auth, async(req, res)=>{
+    try {
+        if(!req.userId) return res.status(400).json("unauthenticated")
+
+        const likepost = await Post.findById(req.params.id)
+        if(!likepost){
+            return res.status(404).send("invalid post id")
+        }
+        const index = likepost.likeCount.findIndex((id) => id === String(req.userId));
+        if (index === -1) {
+            likepost.likeCount.push(req.userId);
+        } else {
+            likepost.likeCount = likepost.likeCount.filter((id) => id !== String(req.userId));
+        }
+        const updatelike = await likepost.save()
+        res.json(updatelike) 
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Like, Server Error");
+    }
+})
+
+//Search functionality
+//Contact US Form
+//Forgot password
+//Passport js Facebook
 
 
 module.exports = route

@@ -9,7 +9,7 @@ const Form = () => {
   const classes = useStyles()
   const dispatch = useDispatch()
   const getpost = useSelector(state=> state.singlepost)
-  
+  const user = JSON.parse(localStorage.getItem('profile'))
   const [postData, setPostData] = useState({
     creator:"", title:"", message:"", tags:"", selectedFile:""
   })
@@ -17,10 +17,6 @@ const Form = () => {
   useEffect(() => {
     if(getpost.post!=null){
       setPostData(getpost.post)
-    }else{
-      setPostData({
-        creator:"", title:"", message:"", tags:"", selectedFile:""
-      })
     }
   }, [getpost])
   
@@ -30,11 +26,11 @@ const Form = () => {
       dispatch(createPostAction(postData))
     }else{
       dispatch(updatePostAction(getpost.post._id,postData))
+      dispatch({type: "RESET_DATA"})
     }
     setPostData({
       creator:"", title:"", message:"", tags:"", selectedFile:""
     })
-
   }
 
   const FileHandler = async(e) =>{
@@ -59,6 +55,16 @@ const Form = () => {
     setPostData({
       creator:"", title:"", message:"", tags:"", selectedFile:""
     })
+  }
+
+  if (!user?.result) {
+    return (
+      <Paper className={classes.paper}>
+        <Typography variant="h6" align="center">
+          Please Sign In to create your own memories and like other's memories.
+        </Typography>
+      </Paper>
+    );
   }
 
   return (

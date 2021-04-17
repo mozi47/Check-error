@@ -21,6 +21,11 @@ export const singlepostReducer = (state={post:null}, action) =>{
                 ...state,
                 post:payload
             }
+        case "RESET_DATA":
+            return {
+                ...state,
+                post:null
+            }
         default:
             return state;
     }
@@ -45,7 +50,33 @@ export const updatePostReducer = (state={post:[]}, action) =>{
         case "UPDATE_POST":
             return {
                 ...state,
-                post: state.payload
+                post: payload
+            }
+        default:
+            return state;
+    }
+}
+
+export const deletePostReducer = (state={loading:true}, action) =>{
+    const {payload,type} = action
+    switch (type) {
+        case "DELETE_POST":
+            return {
+                loading: false
+            }
+        default:
+            return state;
+    }
+}
+
+export const likePostReducer = (state={like:[]}, action) =>{
+    const {payload,type} = action
+    console.log(payload)
+    switch (type) {
+        case "LIKE_POST":
+            return {
+                ...state,
+                like: payload,
             }
         default:
             return state;

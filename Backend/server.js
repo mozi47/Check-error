@@ -10,9 +10,10 @@ const app = express()
 dotenv.config()
 connectDB()
 const PORT = process.env.PORT || 8000
-app.use(morgan("dev"))
 
+app.use(morgan("dev"))
 app.use(express.json())
+
 app.use("/api/user",userRouter)
 app.use("/api/post",postRouter)
 
