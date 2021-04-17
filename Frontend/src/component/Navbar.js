@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { AppBar, Typography, Toolbar, Avatar, Button } from '@material-ui/core';
+import React, { useState, useEffect, Fragment } from 'react';
+import { AppBar, Typography, Toolbar, Avatar, Button, TextField } from '@material-ui/core';
 import { Link} from 'react-router-dom';
 import memories from '../images/memories.png';
 import useStyles from './Nstyle';
 import {useHistory, useLocation} from "react-router-dom";
 import {useDispatch} from "react-redux"
+import {allPosts} from "../actions/PostAction"
 
 const Navbar = () => {
   const classes = useStyles();
   const [user,setUser]=useState(JSON.parse(localStorage.getItem('profile')));
+  const [search,setSearch] = useState("");
   const location = useLocation()
   const history = useHistory()
   const dispatch = useDispatch()
@@ -22,9 +24,23 @@ const Navbar = () => {
   useEffect(() => {
     const token = user?.token
     setUser(JSON.parse(localStorage.getItem('profile')))
-  }, [location])
+  }, [location,search])
+
+  const searchPost = () =>{
+    if(search.trim()){
+      dispatch(allPosts(search))
+      history.push(`/search/${search}`)
+    }else{
+      history.push("/")
+    }
+  }
 
   return (
+    <Fragment>
+    <div className={classes.searchBar} color="inherit">
+      <TextField name="search" variant = "outlined" label="Search Blog Post" className={classes.search} fullWidth value={search} onChange={(e)=>setSearch(e.target.value)}/>
+      <Button onClick={searchPost} className={classes.searchbtn} variant="contained" color="primary">Search</Button>
+    </div>
     <AppBar className={classes.appBar} position="static" color="inherit">
       <div className={classes.brandContainer}>
         <Typography component={Link} to="/" className={classes.heading} variant="h2" align="center">Memories</Typography>
@@ -38,10 +54,14 @@ const Navbar = () => {
             <Button variant="contained" className={classes.logout} color="secondary" onClick={Logout}>Logout</Button>
           </div>
         ) : (
-          <Button component={Link} to="/auth" variant="contained" color="primary">Sign In</Button>
+          <div className={classes.profile}>
+            <Button component={Link} to="/auth" variant="contained" color="primary">Sign In</Button>
+            <Button component={Link} to="/contact" variant="contained" color="primary">Contact US</Button>
+          </div>
         )}
       </Toolbar>
     </AppBar>
+    </Fragment>
   );
 };
 

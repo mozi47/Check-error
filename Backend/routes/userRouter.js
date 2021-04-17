@@ -3,6 +3,7 @@ const route = express.Router()
 const User = require("../models/userModel")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const passport = require("passport")
 
 //Login User
 route.post("/signin", async (req,res)=>{
@@ -37,7 +38,6 @@ route.post("/signin", async (req,res)=>{
 //Register User
 route.post("/signup", async (req,res)=>{
     const {email, password,confirmPassword, firstName, lastName } = req.body
-    console.log(email)
     try {
         const signup = await User.findOne({ email})
         if(signup)
@@ -74,5 +74,15 @@ route.post("/signup", async (req,res)=>{
         console.error(error)
     }
 })
+
+//passport login with google
+route.get('/google',passport.authenticate('google', { scope: ['profile',"email"] }));
+
+
+//passport redirect
+route.get('/google/callback',passport.authenticate('google', { failureRedirect: '/signin' }),(req, res) => {
+    const token = req.user
+    res.redirect(token);
+  });
 
 module.exports = route

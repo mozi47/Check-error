@@ -1,11 +1,12 @@
 export const postsReducer = (state={posts:[]}, action) =>{
     const {payload, type} = action
-    
     switch (type) {
         case "FETCH_ALL_POSTS":
             return {
                 ...state,
-                posts:payload
+                posts:payload.getpost,
+                page: payload.page,
+                totalPosts: payload.totalPosts
             }
         default:
             return state;
@@ -71,7 +72,6 @@ export const deletePostReducer = (state={loading:true}, action) =>{
 
 export const likePostReducer = (state={like:[]}, action) =>{
     const {payload,type} = action
-    console.log(payload)
     switch (type) {
         case "LIKE_POST":
             return {

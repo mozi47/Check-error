@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken")
 const Auth = async (req,res,next)=>{
     //if(req,headers)
     try {
-        console.log(req.headers)
         const token = req.headers.authorization.split(" ")[1]
         const jwttoken = token.length < 500
         if(!token){

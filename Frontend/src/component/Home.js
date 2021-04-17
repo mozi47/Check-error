@@ -1,11 +1,15 @@
-import React from 'react'
-import { Container, AppBar, Typography, Grow, Grid } from '@material-ui/core';
+import React,{Fragment} from 'react'
+import { Container, Grow, Grid } from '@material-ui/core';
 import Posts from './Posts';
 import Form from './Form';
+import Paginate from './Paginate';
 
-const App = () => {
+const Home = ({match}) => {
+    const page = match.params.page
+    //console.log(match.params.page)
     //const classes = useStyles()
     return (
+      <Fragment>
       <Grow in>
         <Container>
           <Grid container justify="space-between" alignItems="stretch" spacing={3}>
@@ -18,7 +22,9 @@ const App = () => {
           </Grid>
         </Container>
       </Grow>
+        <Paginate page={page} />
+      </Fragment>
     )
 }
 
-export default App
+export default Home

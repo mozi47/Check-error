@@ -1,12 +1,14 @@
 import axios from "axios"
 
-export const allPosts = () => async (dispatch) =>{
+//FETCH SEARCH OR ALL POST WITH PAGINATION
+export const allPosts = (search="", page=1) => async (dispatch) =>{
     try {
-        const {data} = await axios.get("/api/post")
+        const {data} = await axios.get(`/api/post?search=${search}&page=${page}`)
         dispatch({
             type: "FETCH_ALL_POSTS",
             payload:data
         })
+        //console.log(data)
     } catch (error) {
         console.log(error)
     }
@@ -17,7 +19,7 @@ export const singlePost = (id) => async (dispatch) =>{
         const token = JSON.parse(localStorage.getItem("profile")).token
         const config = {
             headers:{
-                authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`
             }
         }
         const {data} = await axios.get(`/api/post/single/${id}`,config)
@@ -37,7 +39,7 @@ export const createPostAction = (postData) => async (dispatch) =>{
         const token = JSON.parse(localStorage.getItem("profile")).token
         const config = {
             headers:{
-                authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`
             }
         }
         const {data} = await axios.post('/api/post',postData,config)
@@ -50,12 +52,13 @@ export const createPostAction = (postData) => async (dispatch) =>{
     }
 }
 
+//update blog post
 export const updatePostAction = (id,postData) => async (dispatch) =>{
     try {
         const token = JSON.parse(localStorage.getItem("profile")).token
         const config = {
             headers:{
-                authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`
             }
         }
         const {data} = await axios.put(`/api/post/${id}`,postData,config)
@@ -68,12 +71,13 @@ export const updatePostAction = (id,postData) => async (dispatch) =>{
     }
 }
 
+//delete blog post
 export const deletePostAction = (id) => async (dispatch) =>{
     try {
         const token = JSON.parse(localStorage.getItem("profile")).token
         const config = {
             headers:{
-                authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`
             }
         }
         const {data} = await axios.delete(`/api/post/single/${id}/delete`,config)
@@ -86,19 +90,32 @@ export const deletePostAction = (id) => async (dispatch) =>{
     }
 }
 
+//like blog post
 export const likePostAction = (id) => async (dispatch) =>{
     try {
         const token = JSON.parse(localStorage.getItem("profile")).token
         const config = {
             headers:{
-                authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`
             }
         }
         //console.log(config)
-        const {data} = await axios.put(`/api/post/single/${id}/like`,config)
+        const {data} = await axios.put(`/api/post/single/${id}/like`,"",config)
         dispatch({
             type:"LIKE_POST",
             payload: data
+        })
+    } catch (error) {
+        console.log(error)       
+    }
+}
+
+//send email action
+export const sendEmailAction = (postData) => async (dispatch) =>{
+    try {
+        const {data} = await axios.post("/api/post/contactus",postData)
+        dispatch({
+            type:"SEND_EMAIL",
         })
     } catch (error) {
         console.log(error)       

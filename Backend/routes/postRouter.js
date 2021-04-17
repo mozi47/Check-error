@@ -4,12 +4,26 @@ const route = express.Router()
 const Post = require("../models/postModel")
 const multer = require("multer")
 const auth = require("../middleware/Auth")
+const sgMail = require('@sendgrid/mail');
 
-//fetch all posts
+//fetch all posts with search and pagination functionality
 route.get("/", async(req,res)=>{
     try {
-        const getpost = await Post.find()
-        res.status(200).json(getpost)
+        const page = Number(req.query.page)
+        const limit = 2
+        const startIndex = (page-1) * limit       //get the starting index of every page
+        
+        const keyword = req.query.search
+        const regex = new RegExp(keyword,"i")
+        /*const keyword = req.query.keyword ? {
+            title:{
+                $regex: req.query.keyword,
+                $options: "i"
+            }
+        }:{}*/
+        const total = await Post.countDocuments({})
+        const getpost = await Post.find({title:regex}).limit(limit).skip(startIndex)
+        res.json({getpost, page, totalPosts: Math.ceil(total/limit)})
     } catch (error) {
         console.error(error.message);
         res.status(500).send("Server Error");
@@ -52,11 +66,13 @@ const upload = multer({
     },
 })
 
+//upload file
 route.post("/upload",upload.single("image"),(req,res)=>{
     const file = req.file.path.replace(/\\/g,"/" )
     res.send(`/${file}`)
 })
 
+//create post
 route.post("/",auth, async(req,res)=>{
     const post = req.body
     //console.log(req.file)
@@ -93,7 +109,7 @@ route.patch("/:id",async(req,res)=>{
     }
 })*/
 
-
+//update post
 route.put("/:id",auth,async(req,res)=>{
     const post = req.body
     const _id = req.params.id
@@ -117,6 +133,7 @@ route.put("/:id",auth,async(req,res)=>{
     }
 })
 
+//delete post
 route.delete("/single/:id/delete",auth, async(req, res)=>{
     try{
     const deletepost = await Post.findById(req.params.id)
@@ -131,6 +148,7 @@ route.delete("/single/:id/delete",auth, async(req, res)=>{
     }
 })
 
+//like post
 route.put("/single/:id/like",auth, async(req, res)=>{
     try {
         if(!req.userId) return res.status(400).json("unauthenticated")
@@ -153,9 +171,28 @@ route.put("/single/:id/like",auth, async(req, res)=>{
     }
 })
 
-//Search functionality
+
+
 //Contact US Form
-//Forgot password
+route.post("/contactus",async(req,res)=>{
+    const {name, email, message} =req.body
+    sgMail.setApiKey(process.env.MAIL_KEY);
+    const msg= {
+    to: email,
+    from: "umarchusa@gmail.com", // Use the email address or domain you verified above
+    subject: `complain by ${name}`,
+    text: "Message from Memory Post",
+    html: `<strong>
+    ${message}
+    </strong>`,
+    }
+    try {
+        await sgMail.send(msg)
+    } catch (error) {
+        res.status(500).json("server Error")
+    }
+})
+
 //Passport js Facebook
 
 

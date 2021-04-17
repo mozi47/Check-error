@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Avatar, Button, Paper, Grid, Typography, Container } from '@material-ui/core';
 import { GoogleLogin } from 'react-google-login';
+import axios from "axios";
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import {useDispatch} from "react-redux";
 import {useHistory} from "react-router-dom";
@@ -41,18 +42,12 @@ const Auth = () => {
   }
 
   const googleSuccess = async (res)=>{
-    const result = res?.profileObj;
-    const token = res?.tokenId
-    try {
-      dispatch({type:"AUTH", data:{result, token}})
-      history.push("/")
-    } catch (error) {
-      console.error(error)
+    try{
+      const {data} = await axios.get("/api/user/google")
+      console.log(data)
+    }catch(error){
+      console.log(error)
     }
-  }
-  const googleError = (error)=>{
-    console.log(error)
-    console.log("UNSuccessfull attempt")
   }
 
   return (
@@ -77,17 +72,9 @@ const Auth = () => {
           <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
             { isSignup ? 'Sign Up' : 'Sign In' }
           </Button>
-          <GoogleLogin
-            clientId="CLIENT_ID"
-            render={(renderProps) => (
-              <Button className={classes.googleButton} color="primary" fullWidth onClick={renderProps.onClick} disabled={renderProps.disabled} startIcon={<Icon />} variant="contained">
-                Google Sign In
-              </Button>
-            )}
-            onSuccess={googleSuccess}
-            onFailure={googleError}
-            cookiePolicy="single_host_origin"
-          />
+          <Button className={classes.googleButton} color="primary" fullWidth onClick={googleSuccess} startIcon={<Icon />} variant="contained">
+          Google Sign In
+          </Button>
           <Grid container justify="flex-end">
             <Grid item>
               <Button onClick={switchMode}>
